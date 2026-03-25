@@ -1,0 +1,97 @@
+{
+  "_doc": "ai-gate config — edit to customise your allow/ask rules.",
+  "_syntax": "Each rule: { 'tool': 'ToolName' (optional), 'pattern': 'regex' (optional, case-insensitive) }. Omit both fields to match everything for that tool.",
+
+  "ask": [
+    {
+      "_note": "Any rm -rf — always require manual review regardless of target",
+      "tool": "Bash",
+      "pattern": "rm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)"
+    },
+    {
+      "_note": "Pipe curl or wget output directly into a shell interpreter",
+      "tool": "Bash",
+      "pattern": "(curl|wget)[^|]*\\|\\s*(bash|sh|zsh|fish|cmd|powershell)"
+    },
+    {
+      "_note": "Windows drive format",
+      "tool": "Bash",
+      "pattern": "format\\s+[a-z]:"
+    },
+    {
+      "_note": "SQL destructive DDL",
+      "tool": "Bash",
+      "pattern": "DROP\\s+(DATABASE|TABLE)\\s+\\w"
+    },
+    {
+      "_note": "Writes to Windows OS directories",
+      "tool": "Write",
+      "pattern": "^[Cc]:[/\\\\](Windows|System32|Program Files)"
+    },
+    {
+      "_note": "Writes to Unix system directories",
+      "tool": "Write",
+      "pattern": "^/(etc|sys|boot|usr/bin|usr/sbin|sbin)/"
+    }
+  ],
+
+  "allow": [
+    { "_note": "File reads",              "tool": "Read" },
+    { "_note": "File pattern search",     "tool": "Glob" },
+    { "_note": "Content search",          "tool": "Grep" },
+    { "_note": "Subagent spawning",       "tool": "Agent" },
+    { "_note": "User questions",          "tool": "AskUserQuestion" },
+    { "_note": "Skill invocations",       "tool": "Skill" },
+    { "_note": "Tool schema lookup",      "tool": "ToolSearch" },
+    { "_note": "Task management",         "tool": "TaskCreate" },
+    { "_note": "Task management",         "tool": "TaskUpdate" },
+    { "_note": "Task management",         "tool": "TaskGet" },
+    { "_note": "Task management",         "tool": "TaskList" },
+    { "_note": "Task management",         "tool": "TaskOutput" },
+    { "_note": "Task management",         "tool": "TaskStop" },
+    { "_note": "Web fetch",               "tool": "WebFetch" },
+    { "_note": "Web search",              "tool": "WebSearch" },
+    { "_note": "Agent messaging",         "tool": "SendMessage" },
+
+    { "_note": "All git operations",      "tool": "Bash", "pattern": "^git\\s" },
+    { "_note": "GitHub CLI",              "tool": "Bash", "pattern": "^gh\\s" },
+    { "_note": "Directory navigation",    "tool": "Bash", "pattern": "^cd\\s" },
+    { "_note": "Directory listing",       "tool": "Bash", "pattern": "^(ls|dir)(\\s|$)" },
+    { "_note": "Print working dir",       "tool": "Bash", "pattern": "^pwd$" },
+    { "_note": "Echo",                    "tool": "Bash", "pattern": "^echo\\s" },
+    { "_note": "Path lookup",             "tool": "Bash", "pattern": "^(which|where)(\\s|$)" },
+    { "_note": "File reading",            "tool": "Bash", "pattern": "^(cat|head|tail)\\s" },
+    { "_note": "Text search",             "tool": "Bash", "pattern": "^grep\\s" },
+    { "_note": "File search",             "tool": "Bash", "pattern": "^find\\s" },
+    { "_note": "Make directory",          "tool": "Bash", "pattern": "^mkdir\\s" },
+    { "_note": "Copy files",              "tool": "Bash", "pattern": "^cp\\s" },
+    { "_note": "Move / rename",           "tool": "Bash", "pattern": "^mv\\s" },
+    { "_note": "chmod",                   "tool": "Bash", "pattern": "^chmod\\s" },
+    { "_note": "curl HTTP requests",      "tool": "Bash", "pattern": "^curl\\s" },
+    { "_note": "Export env vars",         "tool": "Bash", "pattern": "^export\\s" },
+    { "_note": "wait builtin",            "tool": "Bash", "pattern": "^wait(\\s|$)" },
+    { "_note": "timeout",                 "tool": "Bash", "pattern": "^timeout\\s" },
+    { "_note": "jq",                      "tool": "Bash", "pattern": "^jq\\s" },
+    { "_note": "xargs",                   "tool": "Bash", "pattern": "^xargs\\s" },
+    { "_note": "Python",                  "tool": "Bash", "pattern": "^python3?(\\s|$)" },
+
+    { "_note": "Node.js",                 "tool": "Bash", "pattern": "^node\\s" },
+    { "_note": "npm",                     "tool": "Bash", "pattern": "^npm\\s" },
+    { "_note": "pnpm",                    "tool": "Bash", "pattern": "^pnpm\\s" },
+    { "_note": "yarn",                    "tool": "Bash", "pattern": "^yarn\\s" },
+    { "_note": "npx",                     "tool": "Bash", "pattern": "^npx\\s" },
+    { "_note": "node_modules/.bin tools", "tool": "Bash", "pattern": "node_modules[/\\\\]\\.bin[/\\\\]" },
+    { "_note": "CI-prefixed node cmds",   "tool": "Bash", "pattern": "^CI=(true|false|1|0)\\s+(npm|pnpm|yarn|node|npx)\\s" },
+
+    { "_note": "Gradle / Maven wrapper",  "tool": "Bash", "pattern": "^\"?\\.\\/(gradlew|mvnw)(\\.bat)?" },
+    { "_note": "Java / JAR",              "tool": "Bash", "pattern": "^(java|jar)\\s" },
+    { "_note": "JAVA_HOME-prefixed",      "tool": "Bash", "pattern": "^JAVA_HOME=" },
+    { "_note": "Android (ANDROID_HOME)",  "tool": "Bash", "pattern": "^ANDROID_HOME=" },
+    { "_note": "ADB",                     "tool": "Bash", "pattern": "^adb\\s" },
+    { "_note": "PATH-prefixed build cmds","tool": "Bash", "pattern": "^PATH=" },
+
+    { "_note": "Firebase CLI",            "tool": "Bash", "pattern": "^firebase\\s" },
+    { "_note": "Expo CLI",                "tool": "Bash", "pattern": "^expo\\s" },
+    { "_note": "EAS CLI",                 "tool": "Bash", "pattern": "^eas\\s" }
+  ]
+}

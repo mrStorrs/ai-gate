@@ -1,0 +1,5 @@
+# API key — never commit this
+.api-key
+
+# Decision log (grows indefinitely, machine-specific)
+gate.log
