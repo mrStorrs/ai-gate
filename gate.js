@@ -92,10 +92,12 @@ function log(decision, reason, toolName, toolInput) {
 
 function decide(decision, reason, toolName, toolInput) {
   log(decision, reason, toolName, toolInput);
+  // Valid permissionDecision values: "allow" | "ask" | "deny"
+  // We only use "allow" (auto-approve) and "ask" (prompt user). Never hard-deny.
   const out = {
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
-      permissionDecision: decision, // "allow" | "deny"
+      permissionDecision: decision,
     },
   };
   if (reason) out.hookSpecificOutput.permissionDecisionReason = reason;
@@ -238,11 +240,11 @@ process.stdin.on("end", async () => {
   try {
     await run();
   } catch (err) {
-    // Unhandled error — fail safe, deny and surface the reason
+    // Unhandled error — fail safe, ask the user
     process.stdout.write(JSON.stringify({
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
-        permissionDecision: "deny",
+        permissionDecision: "ask",
         permissionDecisionReason: "ai-gate internal error: " + err.message,
       },
     }) + "\n");
@@ -262,9 +264,17 @@ async function run() {
   const toolInput = input.tool_input || {};
   const config    = loadConfig();
 
-  // 1. Ask list — deny immediately, require manual review
-  if (matchesRules(config.ask || [], toolName, toolInput)) {
-    decide("deny", "Blocked by ai-gate ask list — review this command before approving", toolName, toolInput);
+  // 1. Ask list — deny immediately, require manual review.
+  //    For compound Bash commands also scan with ^ stripped so that
+  //    "cd /tmp && git push" is caught even though the string doesn't start with "git".
+  const askRules = config.ask || [];
+  const matchesAsk = matchesRules(askRules, toolName, toolInput) ||
+    (isCompoundBash(toolName, toolInput) && matchesRules(
+      askRules.map(r => r.pattern ? { ...r, pattern: r.pattern.replace(/^\^/, "") } : r),
+      toolName, toolInput
+    ));
+  if (matchesAsk) {
+    decide("ask", "Blocked by ai-gate ask list — review this command before approving", toolName, toolInput);
     return;
   }
 
@@ -283,8 +293,9 @@ async function run() {
     learnApproval(toolName, toolInput);
     decide("allow", `AI approved: ${reason}`, toolName, toolInput);
   } else if (safe === false) {
-    decide("deny", `AI flagged as unsafe: ${reason}`, toolName, toolInput);
+    decide("ask", `AI flagged — review before approving: ${reason}`, toolName, toolInput);
   } else {
-    decide("deny", `AI gate fallback (${reason})`, toolName, toolInput);
+    // API unavailable or errored — fail safe, ask the user
+    decide("ask", `AI gate fallback (${reason})`, toolName, toolInput);
   }
 }
