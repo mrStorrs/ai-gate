@@ -3,6 +3,15 @@
   "_syntax": "Each rule: { 'tool': 'ToolName' (optional), 'pattern': 'regex' (optional, case-insensitive) }. Omit both fields to match everything for that tool.",
 
   "ask": [
+    { "_note": "git push — sends commits to a remote (hard to undo)",             "tool": "Bash", "pattern": "^git\\s+push(\\s|$)" },
+    { "_note": "git reset --hard — permanently discards local changes",           "tool": "Bash", "pattern": "^git\\s+reset\\b.*--hard" },
+    { "_note": "git clean — deletes untracked files from the working tree",       "tool": "Bash", "pattern": "^git\\s+clean\\b" },
+    { "_note": "git rebase — rewrites commit history",                            "tool": "Bash", "pattern": "^git\\s+rebase\\b" },
+    { "_note": "git commit --amend — rewrites the last commit",                   "tool": "Bash", "pattern": "^git\\s+commit\\b.*--amend" },
+    { "_note": "git branch -D — force-deletes a branch",                         "tool": "Bash", "pattern": "^git\\s+branch\\b.*-D" },
+    { "_note": "git stash drop/clear — permanently removes stashed changes",      "tool": "Bash", "pattern": "^git\\s+stash\\s+(drop|clear)\\b" },
+    { "_note": "git tag -d — deletes a local tag",                               "tool": "Bash", "pattern": "^git\\s+tag\\b.*-d" },
+
     {
       "_note": "Any rm -rf — always require manual review regardless of target",
       "tool": "Bash",
