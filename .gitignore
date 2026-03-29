@@ -3,3 +3,6 @@
 
 # Decision log (grows indefinitely, machine-specific)
 gate.log
+
+# Gate mode override (machine-specific, defaults to "on" when absent)
+.mode

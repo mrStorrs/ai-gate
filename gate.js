@@ -2,7 +2,12 @@
 /**
  * ai-gate — PreToolUse hook for Claude Code
  *
- * Decision flow for every tool call:
+ * Gate mode (stored in .mode, defaults to "on"):
+ *   yolo — approve everything unconditionally
+ *   ask  — approve everything except ask-list items (skip Haiku)
+ *   on   — full pipeline (default)
+ *
+ * Decision flow in "on" mode:
  *   1. ask list match   → deny with message (requires manual review)
  *   2. allow list match → approve instantly (no API call)
  *   3. compound Bash    → skip allow list, send to AI (hidden second commands)
@@ -12,6 +17,7 @@
  *                           error   → deny (fail safe)
  *
  * Config:  ./config.json   — allow / ask rules
+ * Mode:    ./.mode         — current gate mode (yolo | ask | on)
  * API key: ./.api-key      — your Anthropic API key (one line)
  * Logs:    ./gate.log      — every decision recorded here
  */
@@ -22,9 +28,23 @@ const fs   = require("fs");
 const path = require("path");
 const https = require("https");
 
-const GATE_DIR   = path.dirname(__filename);
+const GATE_DIR    = path.dirname(__filename);
 const CONFIG_PATH = path.join(GATE_DIR, "config.json");
 const LOG_PATH    = path.join(GATE_DIR, "gate.log");
+const MODE_PATH   = path.join(GATE_DIR, ".mode");
+
+// ── gate mode ─────────────────────────────────────────────────────────────────
+// "on"   — full pipeline: ask list → allow list → Haiku AI check (default)
+// "ask"  — skip Haiku, auto-approve everything except ask-list items
+// "yolo" — approve everything unconditionally
+
+function loadMode() {
+  try {
+    const mode = fs.readFileSync(MODE_PATH, "utf-8").trim().toLowerCase();
+    if (["yolo", "ask", "on"].includes(mode)) return mode;
+  } catch { /* missing = default */ }
+  return "on";
+}
 
 // ── config ────────────────────────────────────────────────────────────────────
 
@@ -263,6 +283,13 @@ async function run() {
   const toolName  = input.tool_name  || "";
   const toolInput = input.tool_input || {};
   const config    = loadConfig();
+  const mode      = loadMode();
+
+  // ── yolo mode: approve everything unconditionally ─────────────────────────
+  if (mode === "yolo") {
+    decide("allow", "yolo mode — all checks bypassed", toolName, toolInput);
+    return;
+  }
 
   // 1. Ask list — deny immediately, require manual review.
   //    For compound Bash commands also scan with ^ stripped so that
@@ -275,6 +302,12 @@ async function run() {
     ));
   if (matchesAsk) {
     decide("ask", "Blocked by ai-gate ask list — review this command before approving", toolName, toolInput);
+    return;
+  }
+
+  // ── ask mode: everything not on the ask list is auto-approved ─────────────
+  if (mode === "ask") {
+    decide("allow", "ask mode — auto-approved (not on ask list)", toolName, toolInput);
     return;
   }
 
