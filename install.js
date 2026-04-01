@@ -64,5 +64,26 @@ if (alreadyInstalled) {
   console.log("✓ Hook registered in", SETTINGS_PATH);
 }
 
+// 3. Install the /gate slash command
+const COMMANDS_SRC  = path.join(GATE_DIR, "commands", "gate.md");
+const COMMANDS_DEST = path.join(os.homedir(), ".claude", "commands", "gate.md");
+
+if (fs.existsSync(COMMANDS_SRC)) {
+  fs.mkdirSync(path.dirname(COMMANDS_DEST), { recursive: true });
+
+  // Template the .mode path into the command file
+  const template = fs.readFileSync(COMMANDS_SRC, "utf-8");
+  const modePath = path.join(GATE_DIR, ".mode").replace(/\\/g, "/");
+  const rendered = template.replace(
+    /the `\.mode` file inside the ai-gate hook directory \(just the mode string, no newline padding\)\. The hook directory is wherever `gate\.js` is installed\./,
+    `\`${modePath}\` (just the mode string, no newline padding).`
+  );
+
+  fs.writeFileSync(COMMANDS_DEST, rendered);
+  console.log("✓ /gate command installed to", COMMANDS_DEST);
+} else {
+  console.log("⚠ commands/gate.md not found in ai-gate — skipping slash command install");
+}
+
 console.log("\nInstallation complete.");
 console.log("Restart Claude Code for the hook to take effect.");

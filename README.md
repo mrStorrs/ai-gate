@@ -22,12 +22,20 @@ The gate runs in one of three modes, controlled by a `.mode` file in the gate di
 | `ask`  | Ask-list items still prompt; everything else is auto-approved (no Haiku call) |
 | `yolo` | Approve everything unconditionally — no checks at all |
 
-Write the mode name to `.mode` to switch:
+Switch modes with the `/gate` slash command in Claude Code:
+
+```
+/gate yolo   # no checks
+/gate ask    # skip AI checks, keep ask list
+/gate on     # restore full pipeline
+```
+
+Or write the mode name directly to `.mode`:
 
 ```bash
-echo "ask"  > /path/to/ai-gate/.mode   # skip AI checks, keep ask list
-echo "yolo" > /path/to/ai-gate/.mode   # no checks
-echo "on"   > /path/to/ai-gate/.mode   # restore full pipeline
+echo "ask"  > /path/to/ai-gate/.mode
+echo "yolo" > /path/to/ai-gate/.mode
+echo "on"   > /path/to/ai-gate/.mode
 ```
 
 If `.mode` is missing or contains an unrecognised value the gate defaults to `on`.
@@ -183,12 +191,13 @@ The file grows indefinitely — rotate or delete it as needed. It is excluded fr
 
 ```
 ai-gate/
-├── gate.js        — the hook script (no dependencies)
-├── config.json    — allow / ask rules
-├── install.js     — one-time setup helper
-├── .mode          — current gate mode: on | ask | yolo (gitignored, defaults to "on")
-├── .api-key       — your API key (gitignored, create after cloning)
-├── gate.log       — decision log (gitignored, auto-created)
+├── gate.js            — the hook script (no dependencies)
+├── config.json        — allow / ask rules
+├── install.js         — one-time setup helper
+├── commands/gate.md   — /gate slash command (installed to ~/.claude/commands/)
+├── .mode              — current gate mode: on | ask | yolo (gitignored, defaults to "on")
+├── .api-key           — your API key (gitignored, create after cloning)
+├── gate.log           — decision log (gitignored, auto-created)
 └── .gitignore
 ```
 
