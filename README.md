@@ -1,9 +1,13 @@
 # ai-gate
 
+Are you tired of pushing "accept" on permissions requests? Well this project is just for you, ya lazy bum. It will save only the most dire of requests for you, and ping the API for any suspicious activity. Is it really safe to ask AI if AI is safe? WHO KNOWS. Better than just bypassing it though!
+
+You can also make sure that some things still ask no matter what — so there's that.
+
 A [Claude Code](https://claude.ai/code) `PreToolUse` hook that acts as a smart permission gate for every tool call your AI agent makes.
 
 - **Allow list** → auto-approved instantly, no prompt, no API call
-- **Ask list** → always blocked with a message (requires your manual review)
+- **Ask list** → always requires your manual review, no matter what mode you're in
 - **Everything else** → sent to Claude Haiku for a safety verdict in ~1s
   - Safe → auto-approved, pattern saved to allow list for next time
   - Unsafe → blocked with AI's reason
